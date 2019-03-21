@@ -33,6 +33,8 @@ public class MovieViewActivity extends AppCompatActivity {
     TextView releaseDate;
     TextView summaryText;
 
+    JSONObject movieJson;
+
     int imgIndex;
 
     @Override
@@ -53,7 +55,7 @@ public class MovieViewActivity extends AppCompatActivity {
 
         String url = "https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + titleFromMain + "&callback=?";
         try {
-//            new getJson().execute(url).get();
+            movieJson = new getJson().execute(url).get();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,49 +67,72 @@ public class MovieViewActivity extends AppCompatActivity {
             imgIndex = MainActivity.comingSoonMovies.indexOf(titleFromMain);
             downloadImage(MainActivity.comingImageUrls.get(imgIndex));
         }
+
+        if (movieJson != null) {
+            System.out.println(movieJson.toString());
+//        Setting release Date
+            try {
+                String stringDate = movieJson.getString("release_date").replaceAll("\"","");
+                Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(stringDate);
+                String dateTransf = new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
+                releaseDate.setText("Coming: " + dateTransf);
+                //                    set summary
+                summaryText.setText(movieJson.getString("overview"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-//    public class getJson extends AsyncTask<String, Void, String> {
-//
-//        @Override
-//        protected String doInBackground(String... urls) {
-//            return MainActivity.getJson(urls);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//            super.onPostExecute(s);
-//
-//            try {
-//                JSONObject json = new JSONObject(s.substring(2, s.lastIndexOf(')')));
-//
-//                String results = json.getString("results");
-//
-//                JSONArray jsonArray = new JSONArray(results);
-//
-//                if (jsonArray.length() > 0) {
-//                    JSONObject firstResult = jsonArray.getJSONObject(0);
-//
-////                    setting poster
-//                    posterPath = firstResult.getString("poster_path");
-//                    downloadImage(posterPath);
-//
-////                    Setting release Date
-//                    String stringDate = firstResult.getString("release_date").replaceAll("\\\"","");
-//                    Date date = new SimpleDateFormat("YYYY-MM-DD", Locale.ROOT).parse(stringDate);
-//                    String dateTransf = new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
-//
-//                    releaseDate.setText("Coming: " + dateTransf);
-//
-////                    set summary
-//                    summaryText.setText(firstResult.getString("overview"));
-//                }
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    public class getJson extends AsyncTask<String, Void, JSONObject> {
+
+        @Override
+        protected JSONObject doInBackground(String... urls) {
+            StringBuilder res = new StringBuilder();
+            URL url;
+            HttpURLConnection connection;
+
+            try {
+                url = new URL(urls[0]);
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream in = connection.getInputStream();
+
+                InputStreamReader reader = new InputStreamReader(in);
+                int data = reader.read();
+
+
+                while (data != -1) {
+                    char current = (char) data;
+                    res.append(current);
+                    data = reader.read();
+                }
+
+                String s = res.toString();
+
+                JSONObject json = new JSONObject(s.substring(2, s.lastIndexOf(')')));
+
+                String results = json.getString("results");
+
+                JSONArray jsonArray = new JSONArray(results);
+
+                if (jsonArray.length() > 0) {
+                    return jsonArray.getJSONObject(0);
+                } else {
+                    return new JSONObject();
+                }
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return new JSONObject();
+        }
+    }
 
     public void downloadImage (String posterPath) {
         ImageDownloader task = new ImageDownloader();

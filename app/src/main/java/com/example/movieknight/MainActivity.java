@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         getImages(comingSoonMovies,comingImageUrls);
         initNewMoviesRecycler();
         initComingMoviesRecycler();
-
     }
 
     public static class getRss extends AsyncTask<String, Void, ArrayList<String>> {
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             item = formatTitle(item);
             String posterPath = "none";
             try {
-                posterPath = new getJson().execute("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + item + "&callback=?").get();
+                posterPath = new getPosterPath().execute("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + item + "&callback=?").get();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 //    helper GetJson
-    public static class getJson extends AsyncTask<String, Void, String> {
+    public static class getPosterPath extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... urls) {
