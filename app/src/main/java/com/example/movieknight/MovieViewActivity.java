@@ -12,6 +12,8 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,6 +32,8 @@ public class MovieViewActivity extends AppCompatActivity {
     ImageView moviePoster;
     TextView releaseDate;
     TextView summaryText;
+
+    int imgIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,34 +57,21 @@ public class MovieViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        if (MainActivity.newMovies.contains(titleFromMain)) {
+            imgIndex = MainActivity.newMovies.indexOf(titleFromMain);
+            downloadImage(MainActivity.imageUrls.get(imgIndex));
+        } else if (MainActivity.comingSoonMovies.contains(titleFromMain)) {
+            imgIndex = MainActivity.comingSoonMovies.indexOf(titleFromMain);
+            downloadImage(MainActivity.comingImageUrls.get(imgIndex));
+        }
     }
 
-//    public void downloadImage (String posterPath) {
-//        ImageDownloader task = new ImageDownloader();
-//
-//        Bitmap myImage;
-//        try {
-//            myImage = task.execute("https://image.tmdb.org/t/p/w500" + posterPath).get();
-//
-//            moviePoster.setImageBitmap(myImage);
-//
-//        } catch (ExecutionException e) {
-//            Log.i("Exception", "EXECUTION");
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            Log.i("Exception", "INTERRUPTION");
-//            e.printStackTrace();
-//        } catch (Exception e ) {
-//            Log.i("Exception", "GENERAL");
-//            e.printStackTrace();
-//        }
-//    }
-//
 //    public class getJson extends AsyncTask<String, Void, String> {
 //
 //        @Override
 //        protected String doInBackground(String... urls) {
-//            return MainActivity.doInBackgroundHelper(urls);
+//            return MainActivity.getJson(urls);
 //        }
 //
 //        @Override
@@ -118,7 +109,28 @@ public class MovieViewActivity extends AppCompatActivity {
 //        }
 //    }
 
-    public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
+    public void downloadImage (String posterPath) {
+        ImageDownloader task = new ImageDownloader();
+
+        Bitmap myImage;
+        try {
+            myImage = task.execute("https://image.tmdb.org/t/p/w500" + posterPath).get();
+
+            moviePoster.setImageBitmap(myImage);
+
+        } catch (ExecutionException e) {
+            Log.i("Exception", "EXECUTION");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Log.i("Exception", "INTERRUPTION");
+            e.printStackTrace();
+        } catch (Exception e ) {
+            Log.i("Exception", "GENERAL");
+            e.printStackTrace();
+        }
+    }
+
+    public static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
 
         @Override
         protected Bitmap doInBackground(String... urls) {
@@ -131,9 +143,7 @@ public class MovieViewActivity extends AppCompatActivity {
 
                 InputStream in = connection.getInputStream();
 
-                Bitmap myBitmap = BitmapFactory.decodeStream(in);
-
-                return myBitmap;
+                return BitmapFactory.decodeStream(in);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

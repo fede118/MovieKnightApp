@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,11 +46,11 @@ import javax.xml.transform.Result;
 public class MainActivity extends AppCompatActivity {
     String TAG = "MAIN ACTIVITY ==========>";
     
-    private ArrayList<String> newMovies = new ArrayList<>();
-    private ArrayList<String> imageUrls = new ArrayList<>();
+    public static ArrayList<String> newMovies = new ArrayList<>();
+    public static ArrayList<String> imageUrls = new ArrayList<>();
 
-    private ArrayList<String> comingSoonMovies = new ArrayList<>();
-    private ArrayList<String> comingImageUrls = new ArrayList<>();
+    public static ArrayList<String> comingSoonMovies = new ArrayList<>();
+    public static ArrayList<String> comingImageUrls = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         TextView textView = findViewById(R.id.textView);
         textView.setText(Html.fromHtml(title));
 
-
         try {
             newMovies = new getRss().execute("https://www.fandango.com/rss/newmovies.rss").get();
             comingSoonMovies = new getRss().execute("https://www.fandango.com/rss/comingsoonmovies.rss").get();
@@ -68,13 +69,17 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        newMovies = formatAllTitles(newMovies);
+        comingSoonMovies = formatAllTitles(comingSoonMovies);
+
         getImages(newMovies, imageUrls);
         getImages(comingSoonMovies,comingImageUrls);
         initNewMoviesRecycler();
         initComingMoviesRecycler();
+
     }
 
-    public class getRss extends AsyncTask<String, Void, ArrayList<String>> {
+    public static class getRss extends AsyncTask<String, Void, ArrayList<String>> {
 
         @Override
         protected ArrayList<String> doInBackground(String... urls) {
@@ -145,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             item = formatTitle(item);
             String posterPath = "none";
             try {
-                posterPath = new getJson().execute("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + formatTitle(item) + "&callback=?").get();
+                posterPath = new getJson().execute("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + item + "&callback=?").get();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -204,9 +209,19 @@ public class MainActivity extends AppCompatActivity {
 
     //  helper remove whitespaces at begginings and ends and remove parenthesis info
     public String formatTitle(String title) {
-        String result = title.replaceAll("\\([^\\(]*\\)", "");
-        result = result.trim();
+        String result = title.replaceAll("\\([^(]*\\)", "");
         result = result.replace("Fandango Early Access:", "");
+        result = result.trim();
         return result;
+    }
+
+    public ArrayList<String> formatAllTitles (ArrayList<String> list) {
+        ArrayList<String> replacement = new ArrayList<>();
+
+        for (String item : list) {
+            replacement.add(formatTitle(item));
+        }
+
+        return replacement;
     }
 }
