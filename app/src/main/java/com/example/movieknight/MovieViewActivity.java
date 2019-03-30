@@ -1,18 +1,21 @@
 package com.example.movieknight;
 
-import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.support.design.widget.TabLayout;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,14 +24,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class MovieViewActivity extends AppCompatActivity {
-    String posterPath;
+
+    private Toolbar toolbar;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+
     ImageView moviePoster;
     TextView releaseDate;
     TextView summaryText;
@@ -82,6 +90,18 @@ public class MovieViewActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+//        TOOLBAR and TABS Setup
+//        toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//
+//        viewPager = findViewById(R.id.viewpager);
+//        setupViewPager(viewPager);
+//
+//        tabLayout = findViewById(R.id.tabs);
+//        tabLayout.setupWithViewPager(viewPager);
     }
 
     public class getJson extends AsyncTask<String, Void, JSONObject> {
@@ -175,4 +195,42 @@ public class MovieViewActivity extends AppCompatActivity {
             }
         }
     }
+
+//    toolbar and tabs helpers
+//    private void setupViewPager (ViewPager viewPager) {
+//        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+////        esos eran dummy fragments
+//        adapter.addFragment(new Fragment(), "ONE");
+//        adapter.addFragment(new Fragment(), "TWO");
+//        adapter.addFragment(new Fragment(), "THREE");
+//    }
+//
+//    class ViewPagerAdapter extends FragmentPagerAdapter {
+//        private final List<Fragment> mFragmentList = new ArrayList<>();
+//        private final List<String> mFragmentTitleList = new ArrayList<>();
+//
+//        public ViewPagerAdapter (FragmentManager manager) {
+//            super(manager);
+//        }
+//
+//        @Override
+//        public Fragment getItem(int position) {
+//            return mFragmentList.get(position);
+//        }
+//
+//        @Override
+//        public int getCount() {
+//            return mFragmentList.size();
+//        }
+//        public void addFragment (Fragment fragment, String title) {
+//            mFragmentList.add(fragment);
+//            mFragmentTitleList.add(title);
+//        }
+//
+//        @Override
+//        public CharSequence getPageTitle(int position) {
+//            return mFragmentTitleList.get(position);
+//        }
+//    }
 }
+
