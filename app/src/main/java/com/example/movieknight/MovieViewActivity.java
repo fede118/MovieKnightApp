@@ -4,15 +4,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.support.design.widget.TabLayout;
-import android.text.method.ScrollingMovementMethod;
+
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,17 +21,13 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class MovieViewActivity extends AppCompatActivity {
-
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+    private ViewPager pager;
+    private PagerAdapter pagerAdapter;
 
     ImageView moviePoster;
     TextView releaseDate;
@@ -53,10 +45,15 @@ public class MovieViewActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String titleFromMain = intent.getStringExtra("title");
 
+        //        viewPager
+        pager = findViewById(R.id.viewPager);
+        pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(pagerAdapter);
+
         moviePoster = findViewById(R.id.moviePosterView);
         releaseDate = findViewById(R.id.releaseTextView);
         summaryText = findViewById(R.id.summaryView);
-        summaryText.setMovementMethod(new ScrollingMovementMethod());
+//        summaryText.setMovementMethod(new ScrollingMovementMethod());
 
         TextView movieTitleView = findViewById(R.id.titleView);
         movieTitleView.setText(titleFromMain);
@@ -77,7 +74,7 @@ public class MovieViewActivity extends AppCompatActivity {
         }
 
         if (movieJson != null) {
-            System.out.println(movieJson.toString());
+//            System.out.println(movieJson.toString());
 //        Setting release Date
             try {
                 String stringDate = movieJson.getString("release_date").replaceAll("\"","");
@@ -90,18 +87,6 @@ public class MovieViewActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-//        TOOLBAR and TABS Setup
-//        toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//
-//        viewPager = findViewById(R.id.viewpager);
-//        setupViewPager(viewPager);
-//
-//        tabLayout = findViewById(R.id.tabs);
-//        tabLayout.setupWithViewPager(viewPager);
     }
 
     public class getJson extends AsyncTask<String, Void, JSONObject> {
