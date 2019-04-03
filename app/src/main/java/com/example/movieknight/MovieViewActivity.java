@@ -1,6 +1,7 @@
 package com.example.movieknight;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -26,16 +27,14 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class MovieViewActivity extends AppCompatActivity {
-    private ViewPager pager;
-    private PagerAdapter pagerAdapter;
-
+    public ViewPager pager;
+    public PagerAdapter pagerAdapter;
+    public static String summaryString;
+    public JSONObject movieJson;
     ImageView moviePoster;
     TextView releaseDate;
-    TextView summaryText;
 
-    JSONObject movieJson;
-
-    int imgIndex;
+    private int imgIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +51,6 @@ public class MovieViewActivity extends AppCompatActivity {
 
         moviePoster = findViewById(R.id.moviePosterView);
         releaseDate = findViewById(R.id.releaseTextView);
-        summaryText = findViewById(R.id.summaryView);
-//        summaryText.setMovementMethod(new ScrollingMovementMethod());
 
         TextView movieTitleView = findViewById(R.id.titleView);
         movieTitleView.setText(titleFromMain);
@@ -65,6 +62,7 @@ public class MovieViewActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+//        obtener el index del titulo de la lista en MainActivity y bajar la imagen
         if (MainActivity.newMovies.contains(titleFromMain)) {
             imgIndex = MainActivity.newMovies.indexOf(titleFromMain);
             downloadImage(MainActivity.imageUrls.get(imgIndex));
@@ -74,23 +72,24 @@ public class MovieViewActivity extends AppCompatActivity {
         }
 
         if (movieJson != null) {
-//            System.out.println(movieJson.toString());
-//        Setting release Date
             try {
+//            Setting release Date
                 String stringDate = movieJson.getString("release_date").replaceAll("\"","");
                 Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(stringDate);
                 String dateTransf = new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
                 releaseDate.setText("Coming: " + dateTransf);
-                //                    set summary
-                summaryText.setText(movieJson.getString("overview"));
+
+//              set summary
+                summaryString = movieJson.getString("overview");
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+//    async task que accede al API the themoviedb.org para obtener informacion acerca de la pelicula seleccionada
     public class getJson extends AsyncTask<String, Void, JSONObject> {
-
         @Override
         protected JSONObject doInBackground(String... urls) {
             StringBuilder res = new StringBuilder();
@@ -129,8 +128,6 @@ public class MovieViewActivity extends AppCompatActivity {
                     return new JSONObject();
                 }
 
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -139,27 +136,7 @@ public class MovieViewActivity extends AppCompatActivity {
         }
     }
 
-    public void downloadImage (String posterPath) {
-        ImageDownloader task = new ImageDownloader();
-
-        Bitmap myImage;
-        try {
-            myImage = task.execute("https://image.tmdb.org/t/p/w500" + posterPath).get();
-
-            moviePoster.setImageBitmap(myImage);
-
-        } catch (ExecutionException e) {
-            Log.i("Exception", "EXECUTION");
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            Log.i("Exception", "INTERRUPTION");
-            e.printStackTrace();
-        } catch (Exception e ) {
-            Log.i("Exception", "GENERAL");
-            e.printStackTrace();
-        }
-    }
-
+//    async obtiene el poster de la pelicula
     public static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
 
         @Override
@@ -181,41 +158,26 @@ public class MovieViewActivity extends AppCompatActivity {
         }
     }
 
-//    toolbar and tabs helpers
-//    private void setupViewPager (ViewPager viewPager) {
-//        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-////        esos eran dummy fragments
-//        adapter.addFragment(new Fragment(), "ONE");
-//        adapter.addFragment(new Fragment(), "TWO");
-//        adapter.addFragment(new Fragment(), "THREE");
-//    }
-//
-//    class ViewPagerAdapter extends FragmentPagerAdapter {
-//        private final List<Fragment> mFragmentList = new ArrayList<>();
-//        private final List<String> mFragmentTitleList = new ArrayList<>();
-//
-//        public ViewPagerAdapter (FragmentManager manager) {
-//            super(manager);
-//        }
-//
-//        @Override
-//        public Fragment getItem(int position) {
-//            return mFragmentList.get(position);
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return mFragmentList.size();
-//        }
-//        public void addFragment (Fragment fragment, String title) {
-//            mFragmentList.add(fragment);
-//            mFragmentTitleList.add(title);
-//        }
-//
-//        @Override
-//        public CharSequence getPageTitle(int position) {
-//            return mFragmentTitleList.get(position);
-//        }
-//    }
+//    helper ejecuta el getImage Async
+    public void downloadImage (String posterPath) {
+        ImageDownloader task = new ImageDownloader();
+
+        Bitmap myImage;
+        try {
+            myImage = task.execute("https://image.tmdb.org/t/p/w500" + posterPath).get();
+
+            moviePoster.setImageBitmap(myImage);
+
+        } catch (ExecutionException e) {
+            Log.i("Exception", "EXECUTION");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Log.i("Exception", "INTERRUPTION");
+            e.printStackTrace();
+        } catch (Exception e ) {
+            Log.i("Exception", "GENERAL");
+            e.printStackTrace();
+        }
+    }
 }
 

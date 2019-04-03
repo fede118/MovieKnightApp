@@ -1,54 +1,31 @@
 package com.example.movieknight;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.util.Log;
-import android.util.Xml;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import javax.xml.transform.Result;
 
 public class MainActivity extends AppCompatActivity {
     String TAG = "MAIN ACTIVITY ==========>";
-    
+//  estrenos de esta semana y los urls de los posters
     public static ArrayList<String> newMovies = new ArrayList<>();
     public static ArrayList<String> imageUrls = new ArrayList<>();
-
+//  proximos estrenos y sus posters
     public static ArrayList<String> comingSoonMovies = new ArrayList<>();
     public static ArrayList<String> comingImageUrls = new ArrayList<>();
 
@@ -72,14 +49,15 @@ public class MainActivity extends AppCompatActivity {
         newMovies = formatAllTitles(newMovies);
         comingSoonMovies = formatAllTitles(comingSoonMovies);
 
-        getImages(newMovies, imageUrls);
-        getImages(comingSoonMovies,comingImageUrls);
-        initNewMoviesRecycler();
-        initComingMoviesRecycler();
+        getImagesUrl(newMovies, imageUrls);
+        getImagesUrl(comingSoonMovies,comingImageUrls);
+
+        initRecycler(R.id.newMoviesRecycler, newMovies, imageUrls);
+        initRecycler(R.id.comingMoviesRecycler, comingSoonMovies, comingImageUrls);
     }
 
+//    obtiene rss feed para usar en Fandango.com para obtener los estrenos de esta semana y los proximos estrenos
     public static class getRss extends AsyncTask<String, Void, ArrayList<String>> {
-
         @Override
         protected ArrayList<String> doInBackground(String... urls) {
             ArrayList<String> items = new ArrayList<>();
@@ -128,23 +106,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    recyclers initializer
-    private void initNewMoviesRecycler () {
+    private void initRecycler (int recyclerId, ArrayList<String> titles, ArrayList<String> imgUrls ) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView recyclerView = findViewById(R.id.newMoviesRecycler);
+        RecyclerView recyclerView = findViewById(recyclerId);
         recyclerView.setLayoutManager(layoutManager);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, newMovies, imageUrls);
-        recyclerView.setAdapter(adapter);
-    }
-    private void initComingMoviesRecycler () {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView recyclerView = findViewById(R.id.comingMoviesRecycler);
-        recyclerView.setLayoutManager(layoutManager);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, comingSoonMovies, comingImageUrls);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, titles, imgUrls);
         recyclerView.setAdapter(adapter);
     }
 
-    public void getImages(ArrayList<String> movieList, ArrayList<String> imgUrls) {
+//    obtiene el poster path para todos los titulos y lo guarda en la lista
+    public void getImagesUrl(ArrayList<String> movieList, ArrayList<String> imgUrls) {
         for (String item: movieList) {
             item = formatTitle(item);
             String posterPath = "none";

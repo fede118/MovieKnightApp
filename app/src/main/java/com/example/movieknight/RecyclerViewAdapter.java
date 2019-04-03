@@ -36,6 +36,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
+//        setting poster
+//        getImgsUrl devuelve none si no encuentra
         if (mImageUrls.get(i).equals("none")){
             Glide.with(mContext)
                     .asBitmap()
@@ -48,13 +50,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     .into(viewHolder.image);
         }
 
+//        setting title
         viewHolder.releaseDate.setText(formatTitle(mNames.get(i)));
 
+//        onClick abrir MovieView activity y mandar el titulo como extra
         viewHolder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, MovieViewActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                System.out.println("title ============>" + viewHolder.releaseDate.getText().toString());
                 intent.putExtra("title", viewHolder.releaseDate.getText().toString());
                 v.getContext().startActivity(intent);
             }
