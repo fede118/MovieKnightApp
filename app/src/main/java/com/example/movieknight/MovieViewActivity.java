@@ -107,7 +107,7 @@ public class MovieViewActivity extends AppCompatActivity {
 //              set summary
                 summaryString = movieJson.getString("overview");
 
-//                setting cast
+//               todo: setting cast
                 Log.d(TAG, "movie id: " +  movieJson.getString("id"));
                 String creditsUrl = "https://api.themoviedb.org/3/movie/" + movieJson.getString("id") + "/credits?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&language=en-US";
                 movieCreditsJson = new getJson("cast").execute(creditsUrl).get();
