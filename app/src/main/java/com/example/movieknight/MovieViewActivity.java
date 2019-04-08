@@ -90,11 +90,10 @@ public class MovieViewActivity extends AppCompatActivity {
 //        obtener el index del titulo de la lista en MainActivity y bajar la imagen
         if (MainActivity.newMovies.contains(titleFromMain)) {
             imgIndex = MainActivity.newMovies.indexOf(titleFromMain);
-            downloadImage(MainActivity.imageUrls.get(imgIndex));
         } else if (MainActivity.comingSoonMovies.contains(titleFromMain)) {
             imgIndex = MainActivity.comingSoonMovies.indexOf(titleFromMain);
-            downloadImage(MainActivity.comingImageUrls.get(imgIndex));
         }
+        downloadImage(MainActivity.comingImageUrls.get(imgIndex));
 
         if (movieJson != null) {
             try {
@@ -246,8 +245,8 @@ public class MovieViewActivity extends AppCompatActivity {
             default:
                 otherBtn = findViewById(R.id.castBtn);
         }
-        view.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        otherBtn.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        view.setBackgroundColor(getColor(R.color.colorAccent));
+        otherBtn.setBackgroundColor(getColor(R.color.colorPrimaryDark));
     }
 }
 
