@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class CastListViewFrag extends Fragment {
     private static final String TAG = "SECOND VIEW PAGER FRAG";
-    
+
     public ArrayList<String> castList;
     ListView castListView;
 
@@ -26,13 +26,11 @@ public class CastListViewFrag extends Fragment {
         castListView = rootView.findViewById(R.id.castListView);
 
         castList = demoList(new ArrayList<String>(), 10);
-        ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_1, castList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, castList);
         castListView.setAdapter(adapter);
-
         return rootView;
     }
 
-//    TODO: investigar si puedo tener el cast
 //    TODO: llenar la lista con el cast verdadero
     public ArrayList<String> demoList (ArrayList<String> arrayList, int size) {
         for (int i = 0; i < size; i++) {
