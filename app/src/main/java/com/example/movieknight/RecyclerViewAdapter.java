@@ -20,7 +20,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<String> mImageUrls;
     private Context mContext;
 
-    public RecyclerViewAdapter(Context mContext, ArrayList<String> mNames, ArrayList<String> mImageUrls) {
+    RecyclerViewAdapter(Context mContext, ArrayList<String> mNames, ArrayList<String> mImageUrls) {
         this.mNames = mNames;
         this.mImageUrls = mImageUrls;
         this.mContext = mContext;
@@ -51,7 +51,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
 //        setting title
-        viewHolder.releaseDate.setText(formatTitle(mNames.get(i)));
+        viewHolder.releaseDate.setText(MainActivity.formatTitle(mNames.get(i)));
 
 //        onClick abrir MovieView activity y mandar el titulo como extra
         viewHolder.image.setOnClickListener(new View.OnClickListener() {
@@ -78,12 +78,5 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             image = itemView.findViewById(R.id.image);
             releaseDate = itemView.findViewById(R.id.releaseTextView);
         }
-    }
-
-    private String formatTitle(String title) {
-        String result = title.replaceAll("\\([^(]*\\)", "");
-        result = result.trim();
-        result = result.replace("Fandango Early Access:", "");
-        return result;
     }
 }

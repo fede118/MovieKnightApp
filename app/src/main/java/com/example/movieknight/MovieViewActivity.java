@@ -1,9 +1,6 @@
 package com.example.movieknight;
 
-import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -17,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,15 +50,19 @@ public class MovieViewActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String titleFromMain = intent.getStringExtra("title");
 
-        //        viewPager
+        //        viewPager setup
         pager = findViewById(R.id.viewPager);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
-        pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                switch (position) {
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                switch (i) {
                     case 0:
                         goToTab(findViewById(R.id.summaryBtn));
                         break;
@@ -70,6 +70,11 @@ public class MovieViewActivity extends AppCompatActivity {
                         goToTab(findViewById(R.id.castBtn));
                         break;
                 }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
             }
         });
 
@@ -101,7 +106,7 @@ public class MovieViewActivity extends AppCompatActivity {
                 String stringDate = movieJson.getString("release_date").replaceAll("\"","");
                 Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(stringDate);
                 String dateTransf = new SimpleDateFormat("d MMM", Locale.getDefault()).format(date);
-                releaseDate.setText("Coming: " + dateTransf);
+                releaseDate.setText(String.format("Coming: %s",  dateTransf));
 
 //              set summary
                 summaryString = movieJson.getString("overview");

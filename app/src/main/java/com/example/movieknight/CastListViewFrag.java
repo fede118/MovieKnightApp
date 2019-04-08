@@ -12,8 +12,9 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class SecondViewPagerFrag extends Fragment {
+public class CastListViewFrag extends Fragment {
     private static final String TAG = "SECOND VIEW PAGER FRAG";
+    
     public ArrayList<String> castList;
     ListView castListView;
 

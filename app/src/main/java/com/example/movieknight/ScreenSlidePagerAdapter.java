@@ -17,7 +17,7 @@ class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
             case 0:
                 return new SummaryFrag();
             case 1:
-                return new SecondViewPagerFrag();
+                return new CastListViewFrag();
         }
         return null;
     }

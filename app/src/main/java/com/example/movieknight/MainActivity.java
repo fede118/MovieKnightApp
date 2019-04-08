@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //  helper remove whitespaces at begginings and ends and remove parenthesis info
-    public String formatTitle(String title) {
+    public static String formatTitle(String title) {
         String result = title.replaceAll("\\([^(]*\\)", "");
         result = result.replace("Fandango Early Access:", "");
         result = result.trim();
