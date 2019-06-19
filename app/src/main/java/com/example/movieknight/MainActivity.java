@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
-
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,15 +19,27 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 
 public class MainActivity extends AppCompatActivity {
-    String TAG = "MAIN ACTIVITY ==========>";
+    private static final String TAG = "MAIN ACTIVITY=======>";
+
+//    urls de los estrenos
+    private static final String NEW_MOVIES_URL = "https://www.fandango.com/rss/newmovies.rss";
+    private static final String COOMING_SOON_MOVIES_URL = "https://www.fandango.com/rss/comingsoonmovies.rss";
+
 //  estrenos de esta semana y los urls de los posters
     public static ArrayList<String> newMovies = new ArrayList<>();
-    public static ArrayList<String> imageUrls = new ArrayList<>();
+    public static ArrayList<String> newMoviesImageUrls = new ArrayList<>();
 //  proximos estrenos y sus posters
     public static ArrayList<String> comingSoonMovies = new ArrayList<>();
-    public static ArrayList<String> comingImageUrls = new ArrayList<>();
+    public static ArrayList<String> comingSoonImageUrls = new ArrayList<>();
+
+    private static Disposable observable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,33 +52,24 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(Html.fromHtml(title));
 
         try {
-            newMovies = new getRss().execute("https://www.fandango.com/rss/newmovies.rss").get();
-            comingSoonMovies = new getRss().execute("https://www.fandango.com/rss/comingsoonmovies.rss").get();
+            networkCall(NEW_MOVIES_URL, newMovies, newMoviesImageUrls, R.id.newMoviesRecycler);
+            networkCall(COOMING_SOON_MOVIES_URL, comingSoonMovies, comingSoonImageUrls, R.id.comingMoviesRecycler);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        newMovies = formatAllTitles(newMovies);
-        comingSoonMovies = formatAllTitles(comingSoonMovies);
-
-        getImagesUrl(newMovies, imageUrls);
-        getImagesUrl(comingSoonMovies,comingImageUrls);
-
-        initRecycler(R.id.newMoviesRecycler, newMovies, imageUrls);
-        initRecycler(R.id.comingMoviesRecycler, comingSoonMovies, comingImageUrls);
     }
 
-//    obtiene rss feed para usar en Fandango.com para obtener los estrenos de esta semana y los proximos estrenos
-    public static class getRss extends AsyncTask<String, Void, ArrayList<String>> {
-        @Override
-        protected ArrayList<String> doInBackground(String... urls) {
+
+
+    public void networkCall(final String urlInput, final ArrayList<String> movieList, ArrayList<String> imageUrlList, int recyclerId ) {
+        observable = Observable.fromCallable(() -> {
             ArrayList<String> items = new ArrayList<>();
             StringBuilder res = new StringBuilder();
             URL url;
             HttpURLConnection connection;
 
             try {
-                url = new URL(urls[0]);
+                url = new URL(urlInput);
 
                 connection = (HttpURLConnection) url.openConnection();
                 connection.connect();
@@ -103,9 +106,27 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return items;
             }
-        }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+                    Log.d(TAG, "Rx RESULTS: " + result.toString());
+                    ArrayList<String> res = formatAllTitles((ArrayList<String>) result);
+                    movieList.addAll(res);
+                    getImagesUrl(movieList, imageUrlList);
+                    initRecycler(recyclerId, movieList, imageUrlList);
+                });
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        observable.dispose();
+    }
+
+//  =============  HELPERS:
+//    inicia el recyclerAdapter a partir del Id, de los titulos y los urls de los Posters
     private void initRecycler (int recyclerId, ArrayList<String> titles, ArrayList<String> imgUrls ) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = findViewById(recyclerId);

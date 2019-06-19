@@ -98,7 +98,7 @@ public class MovieViewActivity extends AppCompatActivity {
         } else if (MainActivity.comingSoonMovies.contains(titleFromMain)) {
             imgIndex = MainActivity.comingSoonMovies.indexOf(titleFromMain);
         }
-        downloadImage(MainActivity.comingImageUrls.get(imgIndex));
+        downloadImage(MainActivity.comingSoonImageUrls.get(imgIndex));
 
         if (movieJson != null) {
             try {
