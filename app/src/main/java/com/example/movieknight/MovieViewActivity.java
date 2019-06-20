@@ -27,6 +27,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class MovieViewActivity extends AppCompatActivity {
     private static final String TAG = "MOVIE VIEW ====>";
 
@@ -36,8 +41,7 @@ public class MovieViewActivity extends AppCompatActivity {
     public JSONObject movieJson;
     ImageView moviePoster;
     TextView releaseDate;
-
-    private int imgIndex;
+    Bitmap bitmapPoster;
 
 //  todo:
     public JSONObject movieCreditsJson;
@@ -48,7 +52,14 @@ public class MovieViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_view);
 
         Intent intent = getIntent();
-        String titleFromMain = intent.getStringExtra("title");
+        String titleFromMain = intent.getStringExtra(RecyclerViewAdapter.TITLE);
+
+        moviePoster = findViewById(R.id.moviePosterView);
+        releaseDate = findViewById(R.id.releaseTextView);
+
+        byte[] byteArray = intent.getByteArrayExtra(RecyclerViewAdapter.BITMAP_POSTER);
+        bitmapPoster = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        moviePoster.setImageBitmap(bitmapPoster);
 
         //        viewPager setup
         pager = findViewById(R.id.viewPager);
@@ -78,8 +89,7 @@ public class MovieViewActivity extends AppCompatActivity {
             }
         });
 
-        moviePoster = findViewById(R.id.moviePosterView);
-        releaseDate = findViewById(R.id.releaseTextView);
+
 
         TextView movieTitleView = findViewById(R.id.titleView);
         movieTitleView.setText(titleFromMain);
@@ -91,14 +101,6 @@ public class MovieViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        obtener el index del titulo de la lista en MainActivity y bajar la imagen
-        if (MainActivity.newMovies.contains(titleFromMain)) {
-            imgIndex = MainActivity.newMovies.indexOf(titleFromMain);
-        } else if (MainActivity.comingSoonMovies.contains(titleFromMain)) {
-            imgIndex = MainActivity.comingSoonMovies.indexOf(titleFromMain);
-        }
-        downloadImage(MainActivity.comingSoonImageUrls.get(imgIndex));
 
         if (movieJson != null) {
             try {
@@ -128,7 +130,12 @@ public class MovieViewActivity extends AppCompatActivity {
         }
     }
 
-//    async task que accede al API the themoviedb.org para obtener informacion acerca de la pelicula seleccionada
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    //    async task que accede al API the themoviedb.org para obtener informacion acerca de la pelicula seleccionada
     public class getJson extends AsyncTask<String, Void, JSONObject> {
 //    jsonPrimaryKey seria la Key que contiene la informacion que queremos del json (por como viene formateada de la API
     private String jsonPrimaryKey;
@@ -191,49 +198,7 @@ public class MovieViewActivity extends AppCompatActivity {
         }
     }
 
-//    async obtiene el poster de la pelicula
-    public static class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
 
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-            try {
-                URL url = new URL(urls[0]);
-
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-                connection.connect();
-
-                InputStream in = connection.getInputStream();
-
-                return BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-    }
-
-//    helper ejecuta el getImage Async
-    public void downloadImage (String posterPath) {
-        ImageDownloader task = new ImageDownloader();
-
-        Bitmap myImage;
-        try {
-            myImage = task.execute("https://image.tmdb.org/t/p/w500" + posterPath).get();
-
-            moviePoster.setImageBitmap(myImage);
-
-        } catch (ExecutionException e) {
-            Log.i("Exception", "EXECUTION");
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            Log.i("Exception", "INTERRUPTION");
-            e.printStackTrace();
-        } catch (Exception e ) {
-            Log.i("Exception", "GENERAL");
-            e.printStackTrace();
-        }
-    }
 
 //    goes to selected tab
     public void goToTab(View view) {

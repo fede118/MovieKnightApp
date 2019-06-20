@@ -2,28 +2,64 @@ package com.example.movieknight;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+    private static final String TAG = "RECYCLER ADAPTER ==>";
+
+    static final String TITLE = "title";
+    static final String BITMAP_POSTER = "bitmapPoster";
+//    URLS
+    static final String POSTERS_URL = "https://image.tmdb.org/t/p/w500";
 
     private ArrayList<String> mNames;
-    private ArrayList<String> mImageUrls;
     private Context mContext;
 
-    RecyclerViewAdapter(Context mContext, ArrayList<String> mNames, ArrayList<String> mImageUrls) {
+    private Disposable imageDisposable;
+
+    RecyclerViewAdapter(Context mContext, ArrayList<String> mNames) {
         this.mNames = mNames;
-        this.mImageUrls = mImageUrls;
         this.mContext = mContext;
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView image;
+        TextView title;
+        ProgressBar progressBar;
+
+        ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.image);
+            title = itemView.findViewById(R.id.titleTextView);
+            progressBar = itemView.findViewById(R.id.imageItemProgressBar);
+        }
     }
 
     @NonNull
@@ -36,29 +72,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
-//        setting poster
-//        getImgsUrl devuelve none si no encuentra
-        if (mImageUrls.get(i).equals("none")){
-            Glide.with(mContext)
-                    .asBitmap()
-                    .load(R.drawable.ic_launcher_foreground)
-                    .into(viewHolder.image);
-        } else {
-            Glide.with(mContext)
-                    .asBitmap()
-                    .load("https://image.tmdb.org/t/p/w500" + mImageUrls.get(i))
-                    .into(viewHolder.image);
-        }
+        //        setting title
+        viewHolder.title.setText(MainActivity.formatTitle(mNames.get(i)));
 
-//        setting title
-        viewHolder.releaseDate.setText(MainActivity.formatTitle(mNames.get(i)));
+        //        setting poster
+        getPosterPath("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + mNames.get(i), viewHolder);
 
 //        onClick abrir MovieView activity y mandar el titulo como extra
         viewHolder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Bitmap bitmapPoster = ((BitmapDrawable) viewHolder.image.getDrawable()).getBitmap();
+                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                bitmapPoster.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                byte[] byteArray = bStream.toByteArray();
+
                 Intent intent = new Intent(mContext, MovieViewActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("title", viewHolder.releaseDate.getText().toString());
+                intent.putExtra(TITLE, viewHolder.title.getText().toString());
+                intent.putExtra(BITMAP_POSTER, byteArray);
+
                 v.getContext().startActivity(intent);
             }
         });
@@ -69,14 +101,79 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mNames.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        TextView releaseDate;
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        imageDisposable.dispose();
+    }
 
-        ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            image = itemView.findViewById(R.id.image);
-            releaseDate = itemView.findViewById(R.id.releaseTextView);
-        }
+    private void getPosterPath(final String imgUrl, final ViewHolder viewHolder) {
+        imageDisposable = Observable.fromCallable(() -> {
+            StringBuilder res = new StringBuilder();
+            URL url;
+            HttpURLConnection connection;
+
+            try {
+                url = new URL(imgUrl);
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream in = connection.getInputStream();
+
+                InputStreamReader reader = new InputStreamReader(in);
+                int data = reader.read();
+
+
+                while (data != -1) {
+                    char current = (char) data;
+                    res.append(current);
+                    data = reader.read();
+                }
+
+                String s = res.toString();
+
+                JSONObject json = new JSONObject(s);
+
+                String results = json.getString("results");
+
+                JSONArray jsonArray = new JSONArray(results);
+
+                if (jsonArray.length() > 0) {
+                    JSONObject firstResult = jsonArray.getJSONObject(0);
+
+                    //                    setting poster
+                    return firstResult.getString("poster_path");
+                } else {
+                    return "none";
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+                    Log.d(TAG, "poster path: " + result);
+
+                    viewHolder.progressBar.setVisibility(View.INVISIBLE);
+                    viewHolder.image.setVisibility(View.VISIBLE);
+
+
+
+                    if (result.equals("none")){
+                        Glide.with(mContext)
+                                .asBitmap()
+                                .load(R.drawable.ic_launcher_foreground)
+                                .into(viewHolder.image);
+                    } else {
+                    Glide.with(mContext)
+                            .asBitmap()
+                            .load(POSTERS_URL + result)
+                            .into(viewHolder.image);
+                    }
+                });
     }
 }
