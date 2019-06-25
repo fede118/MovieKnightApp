@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,13 +34,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private static final String TAG = "RECYCLER ADAPTER ==>";
 
     static final String TITLE = "title";
-    static final String BITMAP_POSTER = "bitmapPoster";
-//    URLS
-    static final String POSTERS_URL = "https://image.tmdb.org/t/p/w500";
+//    static final String BITMAP_POSTER = "bitmapPoster";
+    static final String POSTER_PATH = "posterUrl";
+    //    URLS
+    private static final String POSTERS_URL = "https://image.tmdb.org/t/p/w500";
 
     private ArrayList<String> mNames;
+    private String posterPath;
     private Context mContext;
-
     private Disposable imageDisposable;
 
     RecyclerViewAdapter(Context mContext, ArrayList<String> mNames) {
@@ -57,7 +57,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.image);
-            title = itemView.findViewById(R.id.titleTextView);
+            title = itemView.findViewById(R.id.appTitleTextView);
             progressBar = itemView.findViewById(R.id.imageItemProgressBar);
         }
     }
@@ -65,13 +65,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_listitem,viewGroup,false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.layout_listitem,viewGroup,false);
+
+
 
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
+//        todo: si mNames esta vacia deberia pasar algo como que diga que no hay peliculas
+
         //        setting title
         viewHolder.title.setText(MainActivity.formatTitle(mNames.get(i)));
 
@@ -79,21 +83,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         getPosterPath("https://api.themoviedb.org/3/search/movie?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=" + mNames.get(i), viewHolder);
 
 //        onClick abrir MovieView activity y mandar el titulo como extra
-        viewHolder.image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bitmap bitmapPoster = ((BitmapDrawable) viewHolder.image.getDrawable()).getBitmap();
-                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                bitmapPoster.compress(Bitmap.CompressFormat.PNG, 100, bStream);
-                byte[] byteArray = bStream.toByteArray();
+        viewHolder.image.setOnClickListener(v -> {
+            posterPath = viewHolder.title.getTag().toString();
 
-                Intent intent = new Intent(mContext, MovieViewActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(TITLE, viewHolder.title.getText().toString());
-                intent.putExtra(BITMAP_POSTER, byteArray);
+            Intent intent = new Intent(mContext, MovieViewActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(TITLE, viewHolder.title.getText().toString());
+            intent.putExtra(POSTER_PATH, posterPath);
 
-                v.getContext().startActivity(intent);
-            }
+            v.getContext().startActivity(intent);
         });
+
     }
 
     @Override
@@ -156,11 +155,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((result) -> {
-                    Log.d(TAG, "poster path: " + result);
 
                     viewHolder.progressBar.setVisibility(View.INVISIBLE);
                     viewHolder.image.setVisibility(View.VISIBLE);
-
 
 
                     if (result.equals("none")){
@@ -169,10 +166,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                                 .load(R.drawable.ic_launcher_foreground)
                                 .into(viewHolder.image);
                     } else {
-                    Glide.with(mContext)
-                            .asBitmap()
-                            .load(POSTERS_URL + result)
-                            .into(viewHolder.image);
+                        viewHolder.title.setTag(POSTERS_URL + result);
+                        Glide.with(mContext)
+                                .asBitmap()
+                                .load(POSTERS_URL + result)
+                                .into(viewHolder.image);
                     }
                 });
     }

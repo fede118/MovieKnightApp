@@ -10,7 +10,7 @@
         android:layout_height="0dp"
         android:fontFamily="@font/open_sans_light"
         android:scrollbars="vertical"
-        android:text="Oops, there was a problem!"
+        android:text="@string/error_placeholder"
         android:textAlignment="textStart"
         android:textColor="@android:color/white"
         android:textSize="24sp"

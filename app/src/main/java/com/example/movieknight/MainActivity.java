@@ -1,8 +1,8 @@
 package com.example.movieknight;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,20 +10,17 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageView;
+import android.view.ViewManager;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import android.widget.Toast;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import io.reactivex.Observable;
@@ -37,34 +34,36 @@ public class MainActivity extends AppCompatActivity {
 
 //    urls de los estrenos
     private static final String NEW_MOVIES_URL = "https://www.fandango.com/rss/newmovies.rss";
-    private static final String COOMING_SOON_MOVIES_URL = "https://www.fandango.com/rss/comingsoonmovies.rss";
+    private static final String COMING_SOON_MOVIES_URL = "https://www.fandango.com/rss/comingsoonmovies.rss";
 
-//  estrenos de esta semana y los urls de los posters
-    public static ArrayList<String> newMovies = new ArrayList<>();
+//  estrenos de esta semana
+    public ArrayList<String> newMovies = new ArrayList<>();
 
-//  proximos estrenos y sus posters
-    public static ArrayList<String> comingSoonMovies = new ArrayList<>();
+//  proximos estrenos (semana posterior en adelante)
+    public ArrayList<String> comingSoonMovies = new ArrayList<>();
 
     private static Disposable disposable;
+
+    private ProgressBar progressBar;
+    private Button retryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         String title = "<font color='#4286F4'>M</font>ovie<font color='#4286F4'>K</font>night";
-        TextView textView = findViewById(R.id.titleTextView);
-        textView.setText(Html.fromHtml(title));
+        TextView appTitleTextView = findViewById(R.id.appTitleTextView);
+        appTitleTextView.setText(Html.fromHtml(title));
 
         try {
             networkCall(NEW_MOVIES_URL, newMovies, R.id.newMoviesRecycler);
-            networkCall(COOMING_SOON_MOVIES_URL, comingSoonMovies, R.id.comingMoviesRecycler);
+            networkCall(COMING_SOON_MOVIES_URL, comingSoonMovies, R.id.comingMoviesRecycler);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        ProgressBar progressBar =new ProgressBar(this);
+        progressBar = new ProgressBar(this);
         progressBar.setIndeterminate(true);
     }
 
@@ -111,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
 
                 return items;
 
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+                return false;
             } catch (Exception e) {
                 e.printStackTrace();
                 return items;
@@ -123,6 +125,13 @@ public class MainActivity extends AppCompatActivity {
 
                     ProgressBar progressBar = findViewById(R.id.progressBar);
                     progressBar.setVisibility(View.INVISIBLE);
+
+                    if (result.toString() == "false") {
+                        Toast.makeText(this, "Couldn't comunicate with the server! :(", Toast.LENGTH_SHORT).show();
+                        createRetryButton();
+                        return;
+                    }
+
                     TextView newMoviesTextView = findViewById(R.id.newMoviesTextView);
                     newMoviesTextView.setVisibility(View.VISIBLE);
                     TextView comingSoonMoviesTextView = findViewById(R.id.comingSoonMoviesTextView);
@@ -133,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d(TAG, "initializing reciclerViews");
                     initRecycler(recyclerId, movieList);
+
                 });
     }
 
@@ -150,6 +160,41 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, titles);
         recyclerView.setAdapter(adapter);
+    }
+
+//    create button to retry conection with the servers
+    private void createRetryButton() {
+        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.layout);
+
+        retryButton = new Button(this);
+        retryButton.setId(View.generateViewId());
+        int buttonId = retryButton.getId();
+        retryButton.setText(R.string.retry_button);
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
+
+                try {
+                    networkCall(NEW_MOVIES_URL, newMovies, R.id.newMoviesRecycler);
+                    networkCall(COMING_SOON_MOVIES_URL, comingSoonMovies, R.id.comingMoviesRecycler);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                retryButton.setVisibility(View.INVISIBLE);
+                ((ViewManager) retryButton.getParent()).removeView(retryButton);
+            }
+        });
+        layout.addView(retryButton,0);
+
+        ConstraintSet set = new ConstraintSet();
+        set.clone(layout);
+
+        set.connect(buttonId, ConstraintSet.TOP, R.id.appTitleTextView,ConstraintSet.BOTTOM, 32);
+        set.connect(buttonId, ConstraintSet.START, layout.getId(), ConstraintSet.START, 0);
+        set.connect(buttonId, ConstraintSet.END, layout.getId(), ConstraintSet.END, 0);
+        set.applyTo(layout);
     }
 
     //  helper remove whitespaces at begginings and ends and remove parenthesis info
