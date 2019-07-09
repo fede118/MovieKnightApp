@@ -1,8 +1,7 @@
 package com.example.movieknight.presenter;
 
-import com.example.movieknight.model.Movie;
 import com.example.movieknight.model.MovieList;
-import com.example.movieknight.model.views.AllMoviesView;
+import com.example.movieknight.views.AllMoviesView;
 
 
 import io.reactivex.Observable;

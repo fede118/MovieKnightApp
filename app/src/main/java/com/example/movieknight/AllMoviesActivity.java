@@ -1,9 +1,6 @@
 package com.example.movieknight;
 
 import android.content.Intent;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,10 +14,8 @@ import android.widget.TextView;
 
 import com.example.movieknight.model.Movie;
 import com.example.movieknight.model.MovieList;
-import com.example.movieknight.model.views.AllMoviesView;
+import com.example.movieknight.views.AllMoviesView;
 import com.example.movieknight.presenter.AllMoviesPresenter;
-
-import java.io.Serializable;
 
 
 public class AllMoviesActivity extends AppCompatActivity implements AllMoviesView, RecyclerViewAdapter.OnImageClickedListener {
@@ -97,7 +92,7 @@ public class AllMoviesActivity extends AppCompatActivity implements AllMoviesVie
         intent.putExtra(MOVIE_EXTRA, movie);
 
         startActivity(intent);
-
+        //todo: show progressBar when clicking a movie and waiting for activity to load
     }
 
     //  todo:

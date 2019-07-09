@@ -1,4 +1,4 @@
-package com.example.movieknight.model.views;
+package com.example.movieknight.views;
 
 import com.example.movieknight.model.CastList;
 import com.example.movieknight.model.Movie;

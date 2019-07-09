@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.movieknight.model.CastList;
 import com.example.movieknight.model.Movie;
-import com.example.movieknight.model.views.MovieView;
+import com.example.movieknight.views.MovieView;
 import com.example.movieknight.presenter.SingleMoviePresenter;
 
 import java.util.ArrayList;

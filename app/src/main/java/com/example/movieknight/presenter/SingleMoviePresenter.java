@@ -3,7 +3,7 @@ package com.example.movieknight.presenter;
 import com.example.movieknight.model.CastList;
 import com.example.movieknight.model.Movie;
 import com.example.movieknight.model.MovieList;
-import com.example.movieknight.model.views.MovieView;
+import com.example.movieknight.views.MovieView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
