@@ -7,14 +7,14 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
     private static final int NUM_PAGES = 2;
 
-    private SummaryFrag summaryFrag;
-    private CastListViewFrag castListViewFrag;
+    private SummaryFragment summaryFrag;
+    private CastListViewFragment castListViewFrag;
 
 
     public ScreenSlidePagerAdapter(FragmentManager fm) {
         super(fm);
-        this.summaryFrag = new SummaryFrag();
-        this.castListViewFrag = new CastListViewFrag();
+        this.summaryFrag = new SummaryFragment();
+        this.castListViewFrag = new CastListViewFragment();
     }
 
 
@@ -35,10 +35,10 @@ class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         return NUM_PAGES;
     }
 
-    public SummaryFrag getSummaryFrag() {
+    public SummaryFragment getSummaryFrag() {
         return summaryFrag;
     }
-    public CastListViewFrag getCastListViewFrag() {
+    public CastListViewFragment getCastListViewFrag() {
         return castListViewFrag;
     }
 }

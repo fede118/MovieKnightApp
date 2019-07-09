@@ -21,9 +21,9 @@
                 android:resource="@xml/movie_knight_widget_info" />
         </receiver>
 
-        <activity android:name=".MovieViewActivity" />
-        <activity android:name=".GetMovieActivity" android:exported="true"/>
-        <activity android:name=".MainActivity">
+        <activity android:name=".SingleMovieViewActivity" />
+        <activity android:name=".presenter.AllMoviesPresenter" android:exported="true"/>
+        <activity android:name=".AllMoviesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

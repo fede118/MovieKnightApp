@@ -1,6 +1,7 @@
 package com.example.movieknight;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,12 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import io.reactivex.disposables.Disposable;
 
-public class CastListViewFrag extends Fragment {
+public class CastListViewFragment extends Fragment {
     private static final String TAG = "SECOND VIEW PAGER FRAG";
 
     public ArrayList<String> castList;
@@ -41,7 +43,18 @@ public class CastListViewFrag extends Fragment {
         if (castList.size() == 0) {
             castList.add("Couldn't find cast for this movie, sorry");
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, castList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, castList) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view =  super.getView(position, convertView, parent);
+
+                TextView textView = view.findViewById(android.R.id.text1);
+                textView.setTextColor(Color.WHITE);
+
+                return view;
+            }
+        };
         castListView.setAdapter(adapter);
     }
 }

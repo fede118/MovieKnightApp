@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context=".MovieViewActivity">
+    tools:context=".SingleMovieViewActivity">
 
     <TextView
         android:id="@+id/titleView"
@@ -37,7 +37,7 @@
     <TextView
         android:id="@+id/releaseTextView"
         android:layout_width="152dp"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="60dp"
         android:layout_marginEnd="8dp"
